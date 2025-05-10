@@ -1,5 +1,7 @@
 // server/controllers/templateController.js
 import Template from '../models/Template.js';
+import { generatePDF } from '../services/pdfService.js';
+import { getTemplateById } from '../services/templateService.js';
 
 // List all templates for the current user
 export const listTemplates = async (req, res, next) => {
@@ -7,7 +9,10 @@ export const listTemplates = async (req, res, next) => {
     const userId = req.user?.id; // may be undefined if public
     const filter = userId ? { user: userId } : {};
     const templates = await Template.find(filter).lean();
-    res.render('templates/index', { templates });
+    res.render('index', {
+      templates,
+      title: 'Your Templates', // ← add this
+    });
   } catch (err) {
     next(err);
   }
@@ -15,7 +20,9 @@ export const listTemplates = async (req, res, next) => {
 
 // Show the “New Template” form
 export const showNewForm = (req, res) => {
-  res.render('templates/new');
+  +res.render('new', {
+    title: 'Create New Template', // ← and this
+  });
 };
 
 // Create a new template
@@ -41,7 +48,11 @@ export const showEditForm = async (req, res, next) => {
     if (!template) {
       return res.status(404).render('error', { message: 'Template not found' });
     }
-    res.render('templates/edit', { template });
+    -res.render('templates/edit', { template });
+    +res.render('edit', {
+      template,
+      title: `Edit: ${template.title}`,
+    });
   } catch (err) {
     next(err);
   }
@@ -72,3 +83,27 @@ export const deleteTemplate = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * GET /templates/:id/pdf - Generate PDF for a template
+ */
+export async function generateTemplatePDF(req, res, next) {
+  try {
+    const { id } = req.params;
+    const template = await getTemplateById(id);
+
+    if (!template) {
+      return res.status(404).render('error', { message: 'Template not found' });
+    }
+
+    try {
+      const pdfBuffer = await generatePDF(template);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.send(pdfBuffer);
+    } catch (err) {
+      next(err);
+    }
+  } catch (err) {
+    next(err);
+  }
+}

@@ -1,0 +1,25 @@
+<%- include('../base/header') %>
+
+    <main>
+        <h1>Fill in the Blank - <%= template.title %>
+        </h1>
+        <p>Instructions: <%= template.instructions %>
+        </p>
+
+        <div class="activity-content">
+            <% template.words.forEach((word, index)=> { %>
+                <p>
+                    <%= index + 1 %>. _______ <%= word.slice(1) %>
+                </p>
+                <% }) %>
+        </div>
+    </main>
+
+    <%- include('../base/footer') %>
+
+        <style>
+            .activity-content p {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+        </style>
