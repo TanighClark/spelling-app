@@ -9,6 +9,10 @@ services:
       - .env
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
+      - ./node_modules:/app/node_modules
+    command: npx nodemon --watch server --exec "node server/server.js"
     depends_on:
       - db
       - redis

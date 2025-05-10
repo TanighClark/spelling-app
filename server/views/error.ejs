@@ -1,0 +1,12 @@
+<%- include('layouts/layout', { title: 'Error' }) %>
+
+    <main role="main" aria-labelledby="errorTitle">
+        <h1 id="errorTitle">Oops! Something went wrong.</h1>
+        <p>
+            <%= message %>
+        </p>
+        <% if (error && error.stack) { %>
+            <pre><%= error.stack %></pre>
+            <% } %>
+                <a href="/" role="button">Go Home</a>
+    </main>

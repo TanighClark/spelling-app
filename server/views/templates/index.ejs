@@ -1,0 +1,42 @@
+<main role="main" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">Your Templates</h1>
+
+    <button id="newTemplateBtn">+ New Template</button>
+
+    <ul>
+        <% templates.forEach(t=> { %>
+            <li>
+                <a href="/templates/<%= t._id %>/edit">
+                    <%= t.title %>
+                </a>
+            </li>
+            <% }) %>
+    </ul>
+
+    <!-- Modal (hidden by default) -->
+    <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+        <h2 id="modalTitle">Create Template</h2>
+        <form action="/templates" method="POST">
+            <!-- form fields go here -->
+            <button type="submit">Save</button>
+        </form>
+        <button id="closeModal">Close</button>
+    </div>
+</main>
+
+<script>
+    // Simple focus trap for modal
+    const modal = document.getElementById('modal');
+    const newBtn = document.getElementById('newTemplateBtn');
+    const closeBtn = document.getElementById('closeModal');
+
+    newBtn.addEventListener('click', () => {
+        modal.hidden = false;
+        closeBtn.focus();
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.hidden = true;
+        newBtn.focus();
+    });
+</script>

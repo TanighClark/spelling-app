@@ -1,0 +1,20 @@
+<section role="region" aria-labelledby="newsHeading">
+    <h2 id="newsHeading">Latest News</h2>
+    <ul>
+        <% newsItems.forEach(item=> { %>
+            <li>
+                <article aria-live="polite">
+                    <h3>
+                        <%= item.title %>
+                    </h3>
+                    <p>
+                        <%= item.content %>
+                    </p>
+                    <time datetime="<%= item.date.toISOString() %>">
+                        <%= item.date.toLocaleDateString() %>
+                    </time>
+                </article>
+            </li>
+            <% }) %>
+    </ul>
+</section>

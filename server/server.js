@@ -12,6 +12,9 @@ import connectDB from './models/db.js';
 import authRoutes from './routes/authRoutes.js';
 import performanceLogger from './middleware/performanceLogger.js';
 import errorHandler from './middleware/errorHandler.js';
+import path from 'path';
+import templateRoutes from './routes/templateRoutes.js';
+import expressLayouts from 'express-ejs-layouts';
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +71,26 @@ app.get('/', (req, res) => {
 
 // Global error handler (last middleware)
 app.use(errorHandler);
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(process.cwd(), 'server', 'views'));
+
+// Default layout file
+app.use(expressLayouts);
+app.set('layout', 'layouts/layout');
+
+// Make user & newsItems available in all views
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  res.locals.newsItems = [];
+  next();
+});
+
+// Serve static assets (CSS, JS, images)
+app.use(express.static(path.join(process.cwd(), 'public')));
+
+// Mount template routes
+app.use('/templates', templateRoutes);
 
 // Start server
 app.listen(PORT, () => {

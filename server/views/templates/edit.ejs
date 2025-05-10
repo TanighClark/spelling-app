@@ -1,0 +1,31 @@
+<%- include('../layouts/layout', { title: 'Edit Template' }) %>
+
+    <main role="main" aria-labelledby="editTitle">
+        <h1 id="editTitle">Edit Template</h1>
+
+        <form action="/templates/<%= template._id %>?_method=PUT" method="POST">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" value="<%= template.title %>" required />
+
+            <label for="words">Words (comma-separated)</label>
+            <input id="words" name="words" type="text" value="<%= template.words.join(',') %>" required />
+
+            <label for="activityType">Activity Type</label>
+            <select id="activityType" name="activityType" required>
+                <% ['Fill-in-the-Blank','Word Search','Matching'].forEach(type=> { %>
+                    <option value="<%= type %>" <%=template.activityType===type ? 'selected' : '' %>><%= type %>
+                    </option>
+                    <% }); %>
+            </select>
+
+            <label for="instructions">Instructions</label>
+            <textarea id="instructions" name="instructions"><%= template.instructions %></textarea>
+
+            <button type="submit">Update</button>
+        </form>
+    </main>
+
+    <script>
+        // No modal here, so focus remains on the form field
+        document.getElementById('title').focus();
+    </script>

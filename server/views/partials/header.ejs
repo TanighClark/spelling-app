@@ -1,0 +1,17 @@
+## 8. Partial: `views/partials/header.ejs`
+```html
+<header role="banner">
+    <nav aria-label="Main navigation">
+        <ul>
+            <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/templates" class="nav-link">Templates</a></li>
+            <li><a href="/api/auth/test" class="nav-link">Auth Test</a></li>
+            <% if (user) { %>
+                <li><span>Welcome, <%= user.name %></span></li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+                <% } else { %>
+                    <li><a href="/api/auth/google" class="nav-link">Sign in with Google</a></li>
+                    <% } %>
+        </ul>
+    </nav>
+</header>
