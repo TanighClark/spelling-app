@@ -86,8 +86,8 @@ app.use('/templates', templateRoutes);
 
 // optional: a landing page at “/”
 app.get('/', (req, res) => {
-  res.render('index', {
-    /* any data for your landing page */
+  res.render('home', {
+    title: 'Welcome to Spelling App',
   });
 });
 

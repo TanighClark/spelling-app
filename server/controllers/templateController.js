@@ -4,14 +4,18 @@ import { generatePDF } from '../services/pdfService.js';
 import { getTemplateById } from '../services/templateService.js';
 
 // List all templates for the current user
+// server/controllers/templateController.js
+
 export const listTemplates = async (req, res, next) => {
   try {
-    const userId = req.user?.id; // may be undefined if public
+    const userId = req.user?.id;
     const filter = userId ? { user: userId } : {};
     const templates = await Template.find(filter).lean();
+
+    // make sure you pass `templates` (and a title) here
     res.render('index', {
       templates,
-      title: 'Your Templates', // ← add this
+      title: 'Your Templates',
     });
   } catch (err) {
     next(err);
