@@ -1,4 +1,4 @@
-// server/middleware/performanceLogger.js
+//  # logs ms per request :contentReference[oaicite:18]{index=18}:contentReference[oaicite:19]{index=19}
 export default function performanceLogger(req, res, next) {
   const start = process.hrtime();
 

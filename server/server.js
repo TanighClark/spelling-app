@@ -6,44 +6,42 @@ import helmet from 'helmet';
 import compression from 'compression';
 import passport from 'passport';
 import session from 'express-session';
-import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
-import connectDB from './models/db.js';
-import authRoutes from './routes/authRoutes.js';
-import performanceLogger from './middleware/performanceLogger.js';
-import errorHandler from './middleware/errorHandler.js';
+import Redis from 'ioredis';
 import path from 'path';
-import templateRoutes from './routes/templateRoutes.js';
 import expressLayouts from 'express-ejs-layouts';
 
-// Load environment variables
+import connectDB from './models/db.js';
+import authRoutes from './routes/authRoutes.js';
+import templateRoutes from './routes/templateRoutes.js';
+import performanceLogger from './middleware/performanceLogger.js';
+import errorHandler from './middleware/errorHandler.js';
+
+// load .env
 dotenv.config();
 
-// Connect to MongoDB
+// connect to Mongo
 connectDB();
 
-// Create Redis client
+// redis client & session store
 const redisClient = new Redis(process.env.REDIS_URL);
 redisClient.on('connect', () => console.log('✅ Redis connected'));
 redisClient.on('error', (err) => console.error('❌ Redis error:', err));
 
-// Create Redis session store
 const redisStore = new RedisStore({ client: redisClient });
 
-// Initialize Express app
+// create express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Performance logging
-app.use(performanceLogger);
+// --- MIDDLEWARE STACK ---
+app.use(performanceLogger); // our custom timing logger
+app.use(cors()); // CORS headers
+app.use(helmet()); // security headers
+app.use(compression()); // gzip/brotli
+app.use(express.json()); // body parser
 
-// Standard middleware
-app.use(cors());
-app.use(helmet());
-app.use(compression());
-app.use(express.json());
-
-// Session handling
+// sessions (stored in Redis)
 app.use(
   session({
     store: redisStore,
@@ -58,41 +56,45 @@ app.use(
   }),
 );
 
-// Initialize Passport for SSO
+// passport
 app.use(passport.initialize());
+app.use(passport.session());
 
-// Routes
-app.use('/api/auth', authRoutes);
-
-// Home route
-app.get('/', (req, res) => {
-  res.send('Spelling App Backend Running');
-});
-
-// Global error handler (last middleware)
-app.use(errorHandler);
-
+// --- VIEW ENGINE & LAYOUTS ---
 app.set('view engine', 'ejs');
-app.set('views', path.join(process.cwd(), 'server', 'views'));
+app.set('views', path.join(process.cwd(), 'server', 'templates'));
 
-// Default layout file
+// express-ejs-layouts will look for layout at `views/base/layout.ejs`
 app.use(expressLayouts);
-app.set('layout', 'layouts/layout');
+app.set('layout', 'base/layout');
 
-// Make user & newsItems available in all views
+// make user available in all templates
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
-  res.locals.newsItems = [];
   next();
 });
 
-// Serve static assets (CSS, JS, images)
+// serve static assets from /public
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// Mount template routes
+// --- ROUTES ---
+// auth API
+app.use('/api/auth', authRoutes);
+
+// server-side rendered templates (list, new, edit, etc.)
 app.use('/templates', templateRoutes);
 
-// Start server
+// optional: a landing page at “/”
+app.get('/', (req, res) => {
+  res.render('index', {
+    /* any data for your landing page */
+  });
+});
+
+// --- ERROR HANDLING ---
+app.use(errorHandler);
+
+// --- START ---
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
