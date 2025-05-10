@@ -12,26 +12,12 @@ import { RedisStore } from 'connect-redis';
 import connectDB from './models/db.js';
 import authRoutes from './routes/authRoutes.js';
 import './models/Activity.js';
+import performanceLogger from './middleware/performanceLogger.js';
 
 // Load environment variables
-
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import connectDB from './models/db.js';
-import authRoutes from './routes/authRoutes.js';
-import passport from './services/googleStrategy.js';
-import connectDB from './models/db.js';
-import authRoutes from './routes/authRoutes.js';
-import './models/Activity.js';
 
 // Load environment variables
 dotenv.config();
-
-// Connect to MongoDB
-connectDB();
 
 // Connect to MongoDB
 connectDB();
@@ -47,6 +33,9 @@ const redisStore = new RedisStore({ client: redisClient });
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Performance logging
+app.use(performanceLogger);
 
 // Middleware
 app.use(cors());
