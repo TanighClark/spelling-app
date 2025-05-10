@@ -1,5 +1,4 @@
 // server/server.js
-
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -11,10 +10,8 @@ import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
 import connectDB from './models/db.js';
 import authRoutes from './routes/authRoutes.js';
-import './models/Activity.js';
 import performanceLogger from './middleware/performanceLogger.js';
-
-// Load environment variables
+import errorHandler from './middleware/errorHandler.js';
 
 // Load environment variables
 dotenv.config();
@@ -37,7 +34,7 @@ const PORT = process.env.PORT || 3000;
 // Performance logging
 app.use(performanceLogger);
 
-// Middleware
+// Standard middleware
 app.use(cors());
 app.use(helmet());
 app.use(compression());
@@ -51,7 +48,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // set to true if behind HTTPS
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 1000 * 60 * 60, // 1 hour
     },
@@ -64,33 +61,13 @@ app.use(passport.initialize());
 // Routes
 app.use('/api/auth', authRoutes);
 
-// Session handling
-app.use(
-  session({
-    store: redisStore,
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false, // set to true if behind HTTPS
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60, // 1 hour
-    },
-  }),
-);
-
-// Initialize Passport for SSO
-app.use(passport.initialize());
-
-// Routes
-app.use('/api/auth', authRoutes);
-
-// Home route
-// Home Route
 // Home route
 app.get('/', (req, res) => {
   res.send('Spelling App Backend Running');
 });
+
+// Global error handler (last middleware)
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
